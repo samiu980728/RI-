@@ -91,9 +91,24 @@
 //集成上拉刷新的方法
 - (void)setUpDownRefresh;
 
+//当前index.row的值
+@property (nonatomic, assign) NSInteger nowIndexPathRowInteger;
+//当前index.section的值
+@property (nonatomic, assign) NSInteger nowIndexPathSectionInteger;
+
+@property (nonatomic, assign) NSInteger nowIndexPathAllPathAreaInteger;
+
+
+//次数
+@property (nonatomic, assign) NSInteger countRowInteger;
+
+@property (nonatomic, assign) NSInteger imageCountInteger;
+
+@property (nonatomic, assign) NSInteger zeroSectionInteger;
+//@property (nonatomic, strong) ZRBCoordinateMananger * manager1;
 //新方法调用Manager类里面的块去回调网络请求
 //- (void)fenethMessageFromManagerBlock;
 //@property (nonatomic, strong)
-
+- (void)changeNum;
 @end
 

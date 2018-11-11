@@ -32,9 +32,9 @@
 @property (nonatomic, strong) ZRBMainWKWebView * mainWebView;
 
 //网络请求需要用到的
-@property (nonatomic, strong) NSMutableArray * mainTitleMutArray;
+@property (nonatomic, strong) NSMutableArray * mainTitleMutArray1;
 
-@property (nonatomic, strong) NSMutableArray * mainImageMutArray;
+@property (nonatomic, strong) NSMutableArray * mainImageMutArray1;
 
 @property (nonatomic, strong) NSMutableArray * mainAnalyisMutArray;
 
@@ -43,14 +43,16 @@
 //新方法调用Manager类里面的块去回调网络请求
 - (void)fenethMessageFromManagerBlock;
 
-@property (nonatomic, strong) NSMutableArray * titleMutArray;
+@property (nonatomic, strong) NSMutableArray * titleMutArray1;
 
-@property (nonatomic, strong) NSMutableArray * imageMutArray;
+@property (nonatomic, strong) NSMutableArray * imageMutArray1;
 
 @property (nonatomic, strong) NSMutableArray * analyJSONMutArray;
 
 @property (nonatomic, assign) BOOL refresh;
 
 @property (nonatomic, assign) NSInteger refreshNumInteger;
+
+
 
 @end

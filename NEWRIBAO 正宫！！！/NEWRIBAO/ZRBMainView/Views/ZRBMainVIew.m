@@ -38,6 +38,12 @@
     
     //测试 出现新的cell
     
+    _zeroSectionInteger = 0;
+    _nowIndexPathRowInteger = 0;
+    _nowIndexPathSectionInteger = 0;
+    _nowIndexPathAllPathAreaInteger = 0;
+    _countRowInteger = 0;
+    _imageCountInteger = 0;
     
     //代理网络传值
     _cellJSONModel = [[ZRBCellModel alloc] init];
@@ -92,13 +98,8 @@
         make.width.equalTo(@50);
         make.height.equalTo(@35);
     }];
-    
-    
-    NSLog(@"----------------------");
-    
     //ZRBCellModel 方法的调用
     [_cellJSONModel giveCellJSONModel];
-    
     
     //在发送通知后
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(tongzhi:) name:@"tongzhi" object:nil];
@@ -112,9 +113,6 @@
         
         //注册头部视图
         [_mainMessageTableView registerClass:[ZRBDetailsTableViewHeaderFooterView class] forHeaderFooterViewReuseIdentifier:@"detailHeaderView"];
-        
-//        [_mainMessageTableView f]
-        
         _mainMessageTableView.delegate = self;
         _mainMessageTableView.dataSource = self;
         
@@ -133,8 +131,6 @@
             
             
             _cellTagInteger = 0;
-            
-            //            make.edges.mas_equalTo(self);
         }];
         [_mainMessageTableView reloadData];
         
@@ -151,125 +147,16 @@
     [[NSNotificationCenter defaultCenter] removeObserver:self name:@"reloadDataTongZhi" object:nil];
 }
 
-////manager类网络请求
-//- (void)fenethMessageFromManagerBlock
-//{
-//    [[ZRBCoordinateMananger sharedManager] fetchDataWithMainJSONModelsucceed:^(NSMutableArray *JSONModelMutArray) {
-//        if ( [JSONModelMutArray isKindOfClass:[NSArray class]] && JSONModelMutArray.count > 0 ){
-//            _analyJSONMutArray = [NSMutableArray arrayWithArray:JSONModelMutArray];
-//        }
-//        for ( int i = 0; i < _analyJSONMutArray.count; i++ ) {
-//            ZRBMainJSONModel * titleModel = [[ZRBMainJSONModel alloc] init];
-//            //StoriesJSONModel * storiesModel = [[StoriesJSONModel alloc] init];
-//
-//            titleModel = _analyJSONMutArray[i];
-//            NSLog(@"-------titleModel---- == = %@--",_analyJSONMutArray[i]);
-//
-//            //为什么加不上去？？？？？
-//            NSLog(@"titleModel.title === %@",titleModel.title);
-//            [_titleMutArray addObject:titleModel.title];
-//
-//            NSLog(@"1232132132132132132132131");
-//
-//            //打印下来是【Images】 但是API分析里是image
-//            //现在问题是 他把StoriesJSONModel 和 MainJSONModel  里的image弄混了
-//            //一个是Images 一个是image
-//
-//
-//            //NSString * JSONImageStr = [NSString stringWithFormat:@"%@",titleModel.images];
-//
-//            NSURL *JSONUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@",titleModel.images[0]]];
-//
-//            NSLog(@"titleModel.image === %@",titleModel.images);
-//
-//            NSLog(@"JSONImageStr == %@",JSONUrl);
-//
-//            NSData * imageData = [NSData dataWithContentsOfURL:JSONUrl];
-//            UIImage * image = [UIImage imageWithData:imageData];
-//
-//            if ( image ){
-//                [_imageMutArray addObject:image];
-//            }
-//
-//        }
-//
-//
-//    } error:^(NSError *error) {
-//        NSLog(@"网络请求出错-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
-//    }];
-//
-//
-//
-//        //以上为刚才修改  ： 注释掉
-//
-////    [ZRBCoordinateMananger sharedManager] fetchDataWithMainJSONModel:^(NSMutableArray *obj) {
-////        <#code#>
-////    };
-//}
-
-
 - (void)tongzhi:(NSNotification *)noti
 {
-    //代理传值
-    //ZRBMainVIew * mainVeiw = [[ZRBMainVIew alloc] init];
-    
-    //代理传值完毕 接下来就是 写ZRBCellModel代理在 该视图下的方法 并进行传值
-    //在底下写 然后NSLog一下！！！！！！！！！
-    //下面为赋值
-    //    //以下为刚才修改 ： 注释掉
-    if ( noti ){
-    _analyJSONMutArray = [NSMutableArray arrayWithArray:noti.userInfo[@"one"]];
-    }
-//
-//
-//    for ( int i = 0; i < _analyJSONMutArray.count; i++ ) {
-//        ZRBMainJSONModel * titleModel = [[ZRBMainJSONModel alloc] init];
-//        //StoriesJSONModel * storiesModel = [[StoriesJSONModel alloc] init];
-//
-//        titleModel = _analyJSONMutArray[i];
-//        NSLog(@"-------titleModel---- == = %@--",_analyJSONMutArray[i]);
-//
-//        //为什么加不上去？？？？？
-//        NSLog(@"titleModel.title === %@",titleModel.title);
-//        [_titleMutArray addObject:titleModel.title];
-//
-//        NSLog(@"1232132132132132132132131");
-//
-//        //打印下来是【Images】 但是API分析里是image
-//        //现在问题是 他把StoriesJSONModel 和 MainJSONModel  里的image弄混了
-//        //一个是Images 一个是image
-//
-//
-//        //NSString * JSONImageStr = [NSString stringWithFormat:@"%@",titleModel.images];
-//
-//        NSURL *JSONUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@",titleModel.images[0]]];
-//
-//        NSLog(@"titleModel.image === %@",titleModel.images);
-//
-//        NSLog(@"JSONImageStr == %@",JSONUrl);
-//
-//        NSData * imageData = [NSData dataWithContentsOfURL:JSONUrl];
-//        UIImage * image = [UIImage imageWithData:imageData];
-//
-//        if ( image ){
-//            [_imageMutArray addObject:image];
-//        }
-//
-//    }
-    //以上为刚才修改  ： 注释掉
-    
-    
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_mainMessageTableView reloadData];
+        //[_mainMessageTableView reloadData];
         _mainMessageTableView.tableFooterView.hidden = YES;
     });
     
 }
 
 //集成上拉刷新的方法
-
-//这个 好像没有 用到？？？？
-//这个写在COntroller里？？？？
 - (void)setUpDownRefresh
 {
     ZRBLoadMoreView * loadMoreView = [[ZRBLoadMoreView alloc] init];
@@ -280,63 +167,9 @@
     _mainMessageTableView.tableFooterView = loadMoreView;
 }
 
-//- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
-//{
-//    return 100;
-//}
-//
-//- (UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section
-//{
-//    ZRBLoadMoreView * loadMoreView = [[ZRBLoadMoreView alloc] init];
-//    [loadMoreView footer];
-//    loadMoreView.frame = CGRectMake(0, 0, 414, 44);
-//
-//    loadMoreView.hidden = NO;
-//    return loadMoreView;
-//}
-
-//- (void)giveCellJSONModelToMainView:(NSMutableArray *)imaMutArray andTitle:(NSMutableArray *)titMutArray
-//{
-////    _imageMutArray = [NSMutableArray ar
-//    //[_imageMutArray setArray:imaMutArray];
-//    //[_imageMutArray addObject:imaMutArray];
-//    //[_imageMutArray arrayByAddingObjectsFromArray:imaMutArray];
-//   // [_titleMutArray setArray:titMutArray];
-//
-////    NSLog(@"****************    imaMutArray = == = = =%@",imaMutArray);
-////    NSLog(@"****************代理协议里的  _imageMutArray = == = = = = == = %@",_imageMutArray);
-//}
-
-//- (void)refresh
-//{
-//
-//    if (self.refreshControl.isRefreshing && self.loadMoreView.isAnimating ==NO){
-//        [self.modelArray removeAllObjects];//清除旧数据，每次都加载最新的数据
-//        self.refreshControl.attributedTitle = [[NSAttributedString alloc]initWithString:@"加载中..."];
-//        [self addData];
-//        self.refreshControl.attributedTitle = [[NSAttributedString alloc]initWithString:@"下拉刷新"];
-//        [self.tableView reloadData];
-//        [self.refreshControl endRefreshing];
-//        self.loadMoreView.tipsLabel.hidden = YES;
-//
-//    }
-//}
-//
-//- (void)loadMore
-//{
-//
-//}
-//
-////加载数据
-//- (void)addData
-//{
-//
-//}
-
 //头视图相关
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
-//    _headerFooterView = [[ZRBDetailsTableViewHeaderFooterView alloc] init];
     _headerFooterView = [tableView dequeueReusableHeaderFooterViewWithIdentifier:@"detailHeaderView"];
     if ( _headerFooterView == nil ){
         _headerFooterView = [[ZRBDetailsTableViewHeaderFooterView alloc] initWithReuseIdentifier:@"detailHeaderView"];
@@ -350,10 +183,6 @@
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
-//    if ( _analyJSONMutArray.count <= 1 ){
-//        return 1;
-//    }
-    
     NSLog(@"_analyJSONMutArray.count == == = = =%li = = == ",_analyJSONMutArray.count);
     return 100;
 }
@@ -362,126 +191,74 @@
 - (void)giveMessageFromViewController:(NSNotification *)noti
 {
     NSLog(@"12321312312312312312312312312312312312312312");
+    
+    NSLog(@"mainVIew _imageMutArray = %@",_imageMutArray);
+    NSLog(@"mainVIew _titleMutArray = %@",_titleMutArray);
+
+    
+    static dispatch_once_t onceToken2;
+    if ( _zeroSectionInteger == 1 ){
+        dispatch_once(&onceToken2, ^{
+            _countRowInteger = 0;
+            _nowIndexPathRowInteger = 0;
+            _imageCountInteger = 0;
+        });
+    }
+    NSLog(@"_zeroSectionInteger = %li",_zeroSectionInteger);
+    
     dispatch_async(dispatch_get_main_queue(), ^{
-        [_mainMessageTableView reloadData];
+    [_mainMessageTableView reloadData];
+        
     });
 }
-
-
-
-//- (UITableViewCell *)
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     static NSString * identifer = @"messageCell";
     NSString * CellIdentitier = [NSString stringWithFormat:@"cell%ld%ld",indexPath.section,indexPath.row];
-    
-    //在mainView的nagviationBar上加按钮！！！
     ZRBNewsTableViewCell * cell = nil;
     
     UITableViewCell * cell2 = nil;
-    cell2 = [tableView dequeueReusableCellWithIdentifier:@"labelCell"];
-    //cell = [tableView dequeueReusableCellWithIdentifier:@"messageCell"];
-    
     cell = [tableView dequeueReusableCellWithIdentifier:identifer];
+    NSLog(@"indexPath.section = %li",indexPath.section);
+    NSLog(@"indexPath.row = %li",indexPath.row);
     
-    
-    //然后该加入那个刷新符号啦！！！！！
-    
-    
-    
-    //cell = [tableView dequeueReusableCellWithIdentifier:CellIdentitier forIndexPath:indexPath];
-    
-    //if ( cell == nil ){
-        //cell = [[ZRBNewsTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:CellIdentitier];
-    
-//    if ( indexPath.section == 0 ){
-//    cell.tag = indexPath.row;
-//        _cellTagInteger++;
-//    }else{
-//        cell.tag = indexPath.row + _cellTagInteger;
-//    }
-//    NSLog(@"cellTagInteger == = = %li",_cellTagInteger);
-//    NSLog(@"cell.tag == = = = = =%li",cell.tag);
-    
-    
-    //NSLog(@"_titleMutArray.count = %li, _imageMutArray.count = %li ",_titleMutArray.count,_imageMutArray.count);
-    
-    //NSLog(@"CELlllllllll 里的 _titleMutArray == %@",_titleMutArray);
-    //if ( cell == nil ){
-        
-        //cell = [[ZRBNewsTableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"messageCell"];
-    
-//    if ( indexPath.section > 1 ){
-//        [_titleMutArray removeAllObjects];
-//        [_imageMutArray removeAllObjects];
-//    }
     
     NSLog(@"_analyJSONMutArray = %@,\n_analyJSONMutArray.count = %li",_analyJSONMutArray,_analyJSONMutArray.count);
     
     NSLog(@"---=-=-=-=-==-=");
     
     NSLog(@"_imageMutArray == == = ==%@ = = =",_imageMutArray);
-    //if ( indexPath.section <= 0 ){
-    //if ( indexPath.row < _analyJSONMutArray.count && indexPath.section == 0 ){
+    
+#pragma mark
     
     if ( [_titleMutArray isKindOfClass:[NSArray class]] && _titleMutArray.count > 0 ){
-        //if ( cell.tag <= _titleMutArray.count ){
-        cell.newsLabel.text = [NSString stringWithFormat:@"%@",_titleMutArray[0][indexPath.row]];
-        //cell.newsLabel.text = [NSString stringWithFormat:@"%@",[_titleMutArray objectAtIndex:indexPath.row]];
-            NSLog(@"111");
-        //}
-        // NSLog(@"[_titleMutArray objectAtIndex:indexPath.row] == %@",[_titleMutArray objectAtIndex:indexPath.row]);
-        //[_titleMutArray removeAllObjects];
+        if ( indexPath.row > 0 ){
+            _zeroSectionInteger = 1;
+        cell.newsLabel.text = [NSString stringWithFormat:@"%@",_titleMutArray[0]];
+            [_titleMutArray removeObjectAtIndex:0];
+        }
         
     }
     
     if ( [_imageMutArray isKindOfClass:[NSArray class]] && _imageMutArray.count > 0 ){
         //if ( cell.tag <= _imageMutArray.count ){
-        cell.newsImageView.image = _imageMutArray[0][indexPath.row];
-//        cell.newsImageView.image = _imageMutArray[indexPath.row];
-       // }
-        //[_imageMutArray removeAllObjects];
-    }
         
-        //NSLog(@"indexPath.section == = = == = == = =%li==-=-=",indexPath.section);
+        if ( indexPath.row > 0 ){
+            
+        cell.newsImageView.image = _imageMutArray[0];
+            [_imageMutArray removeObjectAtIndex:0];
+        }
+    }
         return cell;
-   // }
-    
-    //}
-//    else{
-//        if ( cell2 == nil ){
-//            cell2 = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:@"labelCell"];
-//
-//            NSLog(@"_testStr == = = = %@",_testStr);
-//            if ( _testStr ){
-//            UILabel * label = [[UILabel alloc] init];
-//                label.text = @"你好，我是中国人";
-//                label.font = [UIFont systemFontOfSize:20];
-//                label.frame = CGRectMake(0, 0, 200, 40);
-//                [cell2.contentView addSubview:label];
-//            }
-//
-//        }
-//        return cell2;
-//    }
-    
-  //  }
-    
-    //[self addSubview:cell];
-    //开始给每个单元格赋值
-   // }
-    
-    
-    //目前的一个重用解决方法  不用自定义cell 用系统的cell 解决重用问题  看睡前的最后一篇文章
-    //最新添加到safari书签中的那个！
-    
-    
-   // return cell2;
-    
-    //[tableView reloadData];
-//    return cell;
+   
 }
+
+- (void)changeNum
+{
+    
+}
+
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -489,19 +266,6 @@
     if ( [_delegate respondsToSelector:@selector(pushToWKWebView)] ){
         [_delegate pushToWKWebView];
     }
-    
-    
-    //[currentViewControlller presentViewController:secondMessageViewController animated:YES completion:nil];
-    
-    //    _mainWebView = [[mainWKWebView alloc] initWithFrame:self.frame];
-    //
-    //    [self addSubview:_mainWebView];
-    //
-    //        [_mainWebView createAndGetJSONModelWKWebView];
-    
-    
-    
-    //[_mainWebView recieveNotification];
 }
 
 
@@ -513,33 +277,65 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-    
-    //NSLog(@"_analyJSONMutArray.count === =   %li",_analyJSONMutArray.count);
-    //注意 这个根据 数组的count数量决定
+    NSInteger numRow = 0;
+    NSInteger numSection = 0;
     NSLog(@"_analyJSONMutArray = %@",_analyJSONMutArray);
+    NSLog(@"numSection = %li",numSection);
+    NSLog(@"numRow = %li",numRow);
     
-    //NSUInteger sectionNumInteger = [_imageMutArray count];
-
-    NSLog(@"sizeof(_imageMutArray[section]) / sizeof(_imageMutArray[section][0]) = %li",sizeof(_imageMutArray[section][section]));
+    NSLog(@"222_imageMutArray[section] = = %li",sizeof(_imageMutArray[section]));
+    NSLog(@"2221sizeof(_titleMutArray[section] = %li",sizeof(_titleMutArray[section]));
+    NSLog(@"111_titleMutArray.count = %li",_titleMutArray.count);
     
     NSLog(@"123321_imageMutArray = %@",_titleMutArray);
+    NSLog(@"_countRowInteger = %li",_countRowInteger);
     
+    NSLog(@"_imageCountInteger = %li",_imageCountInteger);
     
-    //一个一个断点的打 找问题  哪里传值有错误！！！！
+    if ( _countRowInteger == 0 && _imageMutArray.count > _imageCountInteger ){
+        
+        _nowIndexPathRowInteger = _imageMutArray.count;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        
+        _countRowInteger++;
+    }
+    if ( _countRowInteger == 1 && _imageMutArray.count > _imageCountInteger ){
+        _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        _countRowInteger++;
+    }
+    if ( _countRowInteger == 2 && _imageMutArray.count > _imageCountInteger ){
+        _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        _countRowInteger++;
+    }
+    if ( _countRowInteger == 3 && _imageMutArray.count > _imageCountInteger ){
+        _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        _countRowInteger++;
+    }
+    if ( _countRowInteger == 4 && _imageMutArray.count > _imageCountInteger ){
+        _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        _countRowInteger++;
+    }
+    if ( _countRowInteger == 5 && _imageMutArray.count > _imageCountInteger ){
+        _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
+        NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
+        _imageCountInteger = _imageMutArray.count;
+        _countRowInteger++;
+    }
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    return sizeof(_imageMutArray[section][section]);
+    NSLog(@"_nowIndexPathRowInteger = %li",_nowIndexPathRowInteger);
+    return _nowIndexPathRowInteger;
+    return _imageMutArray.count;
+    return sizeof(_imageMutArray[section]);
     return sizeof(_imageMutArray[section]) / sizeof(_imageMutArray[section][0]);
-//    return _analyJSONMutArray.count;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
@@ -548,11 +344,8 @@
     
     NSLog(@"manager.dateMutArray.count = %li",manager.dateMutArray.count);
     return manager.dateMutArray.count + 0;
-    return 3;
+    return 4;
 }
-
-
-
 
 - (UIViewController *)getCurrentVC
 {
