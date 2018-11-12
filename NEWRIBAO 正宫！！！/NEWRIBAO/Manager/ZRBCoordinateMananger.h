@@ -12,7 +12,7 @@
 #import "ZRBMainVIew.h"
 
 
-typedef void(^ZRBGetJSONModelHandle)(NSMutableArray * JSONModelMutArray);
+typedef void(^ZRBGetJSONModelHandle)(ZRBOnceUponDataJSONModel * OnceUpOnJSONModel);
 
 //请求失败回调block
 typedef void(^ErrorHandle)(NSError *error);

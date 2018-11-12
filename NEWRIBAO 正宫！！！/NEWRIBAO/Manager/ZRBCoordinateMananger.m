@@ -90,11 +90,9 @@ static ZRBCoordinateMananger * manager = nil;
             
             dispatch_async(seriqlQueue1, ^{
                 
-                NSMutableArray * _beforeJSONModelMut;
-                _beforeJSONModelMut = [[NSMutableArray alloc] init];
+                NSMutableArray * beforeJSONModelMut = [[NSMutableArray alloc] init];
                 
                 _testUrlStr = [NSString stringWithFormat:@"https://news-at.zhihu.com/api/4/news/before/%@",_dateMutArray[i]];
-                NSLog(@"_testUrlStr = %@",_testUrlStr);
                 
                 _testUrlStr = [_testUrlStr stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLQueryAllowedCharacterSet]];
                 
@@ -113,41 +111,26 @@ static ZRBCoordinateMananger * manager = nil;
                     if ( error == nil ){
                         numFlag++;
                         _beforeObj = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-                        
                         NSLog(@"_beforeObj[date] = == %@ ",_beforeObj);
-                        
-                        ZRBOnceUponDataJSONModel * _beforeOnecUponDataJSONModel;
-                        
-                        _beforeOnecUponDataJSONModel = [[ZRBOnceUponDataJSONModel alloc] initWithDictionary:_beforeObj error:nil];
-                        
-                        NSLog(@"_beforeOnecUponDataJSONModel = == = ==  %@",_beforeOnecUponDataJSONModel);
-                        
-                        _beforeDateStr = [NSString stringWithFormat:@"%@",_beforeOnecUponDataJSONModel.date];
-                        
-#pragma mark
-                        NSLog(@"_dateMutArray.count ==  %li",_dateMutArray.count);
-                        
-                        NSLog(@"_dateMutArray = %@",_dateMutArray);
-                        
+                        ZRBOnceUponDataJSONModel * beforeOnecUponDataJSONModel = [[ZRBOnceUponDataJSONModel alloc] initWithDictionary:_beforeObj error:nil];
+                       _beforeDateStr = [NSString stringWithFormat:@"%@",beforeOnecUponDataJSONModel.date];
+//                        NSLog(@"_dateMutArray.count ==  %li",_dateMutArray.count);
+//                        NSLog(@"_dateMutArray = %@",_dateMutArray);
                         NSLog(@"123for循环里面的_beforeDateStr = == =  %@",_beforeDateStr);
                         
-                        NSLog(@"_beforeOnecUponDataJSONModel.stories.count === %li",_beforeOnecUponDataJSONModel.stories.count);
+
                         
-                        for (int i = 0; i < _beforeOnecUponDataJSONModel.stories.count; i++) {
-                            ZRBStoriesGoJSONModel * beforeStroiesGoJSONMOdel;
-                            beforeStroiesGoJSONMOdel = [[ZRBStoriesGoJSONModel alloc] initWithDictionary:_beforeObj[@"stories"][i] error:nil];
+                        for (int i = 0; i < beforeOnecUponDataJSONModel.stories.count; i++) {
+                            ZRBStoriesGoJSONModel * beforeStroiesGoJSONMOdel = [[ZRBStoriesGoJSONModel alloc] initWithDictionary:_beforeObj[@"stories"][i] error:nil];
                             NSLog(@"_beforeStoriesGoJSONModel == =  %@",beforeStroiesGoJSONMOdel);
-                            
                             //这是一天的数据
-                            if ( beforeStroiesGoJSONMOdel ){
-                                //NSLog(@"_dateMutArray = %@",_dateMutArray[i]);
-                                [_beforeJSONModelMut addObject:beforeStroiesGoJSONMOdel];
-                            }
+                            //NSLog(@"_dateMutArray = %@",_dateMutArray[i]);
+                            [beforeJSONModelMut addObject:beforeStroiesGoJSONMOdel];
                         }
                         
                         
-                        NSLog(@"for循环中 每次网络请求到的 _beforeJSONModelMut  = == = =   = = 9 09  %@",_beforeJSONModelMut);
-                        succeedBlock(_beforeJSONModelMut);
+                        NSLog(@"for循环中 每次网络请求到的 _beforeJSONModelMut  = == = =   = = 9 09  %@",beforeJSONModelMut);
+                        succeedBlock(beforeOnecUponDataJSONModel);
                         
                     }else{
                         if ( error ){
@@ -166,6 +149,8 @@ static ZRBCoordinateMananger * manager = nil;
     
 #pragma mark
     //以上是第二次上拉刷新执行的语句
+    
+    NSLog(@"%@",_dateMutArray);
     
         NSLog(@"继续调用原网络请求");
     

@@ -52,6 +52,8 @@
     _titleMutArray = [[NSMutableArray alloc] init];
     
     _imageMutArray = [[NSMutableArray alloc] init];
+    
+    _dateNowMutArray = [[NSMutableArray alloc] init];
     //代理得提前用
     //_cellJSONModel.delegateCell = self;
     
@@ -236,7 +238,7 @@
         if ( indexPath.row > 0 ){
             _zeroSectionInteger = 1;
         cell.newsLabel.text = [NSString stringWithFormat:@"%@",_titleMutArray[0]];
-            [_titleMutArray removeObjectAtIndex:0];
+            //[_titleMutArray removeObjectAtIndex:0];
         }
         
     }
@@ -247,7 +249,7 @@
         if ( indexPath.row > 0 ){
             
         cell.newsImageView.image = _imageMutArray[0];
-            [_imageMutArray removeObjectAtIndex:0];
+            //[_imageMutArray removeObjectAtIndex:0];
         }
     }
         return cell;
@@ -256,6 +258,19 @@
 
 - (void)changeNum
 {
+    //大改：
+    //重新架构 把块的返回值修改了
+    //同时把VIewCOntroler层的代码进行了优化
+    //UIView层的section 与 indexPath.row 的返回值进行了重写
+    //明天测试
+    //满足😌！！！！
+    //加油🆙
+    
+    
+    
+    
+    
+    
     
 }
 
@@ -299,40 +314,55 @@
         _imageCountInteger = _imageMutArray.count;
         
         _countRowInteger++;
+        
+        //在这里return
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[0]];
+        return returnArray.count;
+        
     }
     if ( _countRowInteger == 1 && _imageMutArray.count > _imageCountInteger ){
         _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
         NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
         _imageCountInteger = _imageMutArray.count;
         _countRowInteger++;
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[1]];
+        return returnArray.count;
     }
     if ( _countRowInteger == 2 && _imageMutArray.count > _imageCountInteger ){
         _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
         NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
         _imageCountInteger = _imageMutArray.count;
         _countRowInteger++;
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[2]];
+        return returnArray.count;
     }
     if ( _countRowInteger == 3 && _imageMutArray.count > _imageCountInteger ){
         _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
         NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
         _imageCountInteger = _imageMutArray.count;
         _countRowInteger++;
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[2]];
+        return returnArray.count;
     }
     if ( _countRowInteger == 4 && _imageMutArray.count > _imageCountInteger ){
         _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
         NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
         _imageCountInteger = _imageMutArray.count;
         _countRowInteger++;
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[3]];
+        return returnArray.count;
     }
     if ( _countRowInteger == 5 && _imageMutArray.count > _imageCountInteger ){
         _nowIndexPathRowInteger = _imageMutArray.count - _nowIndexPathRowInteger;
         NSLog(@"image count = %li, section = %li",_imageMutArray.count,section);
         _imageCountInteger = _imageMutArray.count;
         _countRowInteger++;
+        NSArray * returnArray = [NSArray arrayWithArray:_imageMutArray[4]];
+        return returnArray.count;
     }
     
     NSLog(@"_nowIndexPathRowInteger = %li",_nowIndexPathRowInteger);
-    return _nowIndexPathRowInteger;
+    //return _nowIndexPathRowInteger;
     return _imageMutArray.count;
     return sizeof(_imageMutArray[section]);
     return sizeof(_imageMutArray[section]) / sizeof(_imageMutArray[section][0]);
@@ -340,10 +370,12 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    ZRBCoordinateMananger * manager = [ZRBCoordinateMananger sharedManager];
     
-    NSLog(@"manager.dateMutArray.count = %li",manager.dateMutArray.count);
-    return manager.dateMutArray.count + 0;
+    return _dateNowMutArray.count;
+    //ZRBCoordinateMananger * manager = [ZRBCoordinateMananger sharedManager];
+    
+//    NSLog(@"manager.dateMutArray.count = %li",manager.dateMutArray.count);
+//    return manager.dateMutArray.count + 0;
     return 4;
 }
 

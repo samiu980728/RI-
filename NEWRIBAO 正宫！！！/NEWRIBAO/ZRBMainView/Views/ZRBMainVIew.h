@@ -105,6 +105,9 @@
 @property (nonatomic, assign) NSInteger imageCountInteger;
 
 @property (nonatomic, assign) NSInteger zeroSectionInteger;
+
+//日期 返回section值
+@property (nonatomic, strong) NSMutableArray * dateNowMutArray;
 //@property (nonatomic, strong) ZRBCoordinateMananger * manager1;
 //新方法调用Manager类里面的块去回调网络请求
 //- (void)fenethMessageFromManagerBlock;

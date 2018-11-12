@@ -141,66 +141,114 @@
     NSMutableArray * _imageMutArray = [[NSMutableArray alloc] init];
     NSMutableArray * _mainImageMutArray = [[NSMutableArray alloc] init];
     NSMutableArray * _mainTitleMutArray = [[NSMutableArray alloc] init];
-    
     //测试
     NSString * mainTestStr = [[NSString alloc] init];
     
-    [[ZRBCoordinateMananger sharedManager] fetchDataWithMainJSONModelsucceed:^(NSMutableArray *JSONModelMutArray) {
+    __block ZRBCoordinateMananger * manager = [ZRBCoordinateMananger sharedManager];
+    
+    [[ZRBCoordinateMananger sharedManager] fetchDataWithMainJSONModelsucceed:^(ZRBOnceUponDataJSONModel * OnceUpOnJSONModel) {
         
-        if ( [JSONModelMutArray isKindOfClass:[NSArray class]] && JSONModelMutArray.count > 0 ){
-            _analyJSONMutArray = [NSMutableArray arrayWithArray:JSONModelMutArray];
-        }
         
-        NSLog(@"12321312131312 JSONModelMutArray == = =%@ ",JSONModelMutArray);
-
-        for ( int i = 0; i < _analyJSONMutArray.count; i++ ) {
-            ZRBMainJSONModel * titleModel = [[ZRBMainJSONModel alloc] init];
+//                if ( _titleMutArray.count > 0 ){
+//                    [_titleMutArray removeAllObjects];
+//                }
+//                if ( _imageMutArray.count > 0 ){
+//                    [_imageMutArray removeAllObjects];
+//                }
+        
+        //解析JSONModel咋突然不会了
+        NSDictionary * obj = [[NSDictionary alloc] init];
+        obj = [OnceUpOnJSONModel toDictionary];
+        
+        for (int i = 0; i < OnceUpOnJSONModel.stories.count; i++) {
+            ZRBStoriesGoJSONModel * beforeStroiesGoJSONMOdel = [[ZRBStoriesGoJSONModel alloc] initWithDictionary:obj[@"stories"][i] error:nil];
+            NSLog(@"_beforeStoriesGoJSONModel == =  %@",beforeStroiesGoJSONMOdel);
             
-            titleModel = _analyJSONMutArray[i];
-            [_titleMutArray addObject:titleModel.title];
-
-            NSURL *JSONUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@",titleModel.images[0]]];
-
+            [_MainView.titleMutArray addObject:beforeStroiesGoJSONMOdel.title];
+            NSURL *JSONUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@",beforeStroiesGoJSONMOdel.images[0]]];
             NSData * imageData = [NSData dataWithContentsOfURL:JSONUrl];
             UIImage * image = [UIImage imageWithData:imageData];
-
             if ( image ){
-                [_imageMutArray addObject:image];
+                [_MainView.imageMutArray addObject:image];
             }
         }
-        [_mainImageMutArray setArray:_imageMutArray];
-        [_mainTitleMutArray setArray:_titleMutArray];
-#pragma market
-
-        if ( !_MainView.titleMutArray ){
-            _MainView.titleMutArray = [NSMutableArray array];
-        }
-        if ( !_MainView.imageMutArray ){
-            _MainView.imageMutArray = [NSMutableArray array];
-        }
-        NSInteger titleCountInteger = 0;
-        titleCountInteger = _titleMutArray.count;
         
-            for (int i = 0; i < _titleMutArray.count; i++) {
-                NSInteger flag = 0;
-                NSString * str = _titleMutArray[i];
-                for (int i = 0; i < _MainView.titleMutArray.count; i++) {
-                    if ( [str isEqualToString:[NSString stringWithFormat:@"%@",_MainView.titleMutArray[i]]] ){
-                        flag = 1;
-                        break;
-                    }
-                }
-                if ( flag == 0 ){
-                    [_MainView.titleMutArray addObject:_titleMutArray[i]];
-                    [_MainView.imageMutArray addObject:_imageMutArray[i]];
-                }
-            }
+        //每次进来都会添加日期
+        [_MainView.dateNowMutArray addObject:obj[@"date"]];
+        
         //创建一个通知
         NSNotification * reloadDataNotification = [NSNotification notificationWithName:@"reloadDataTongZhi" object:nil userInfo:nil];
-
+        
         //创建并发送通知 然后在View层执行通知 通知的内容是更新视图
         //问题是
         [[NSNotificationCenter defaultCenter] postNotification:reloadDataNotification];
+        
+        
+        //JSONModel 数据类型直接转换成为数组 或字典类型的方法  [JOSNModel toDictionary/array];
+        
+        
+        
+//        if ( _titleMutArray.count > 0 ){
+//            [_titleMutArray removeAllObjects];
+//        }
+//        if ( _imageMutArray.count > 0 ){
+//            [_imageMutArray removeAllObjects];
+//        }
+//
+//        if ( [JSONModelMutArray isKindOfClass:[NSArray class]] && JSONModelMutArray.count > 0 ){
+//            _analyJSONMutArray = [NSMutableArray arrayWithArray:JSONModelMutArray];
+//        }
+//
+//        for ( int i = 0; i < _analyJSONMutArray.count; i++ ) {
+//            ZRBMainJSONModel * titleModel = [[ZRBMainJSONModel alloc] init];
+//
+//            titleModel = _analyJSONMutArray[i];
+//            [_titleMutArray addObject:titleModel.title];
+//
+//            NSURL *JSONUrl = [NSURL URLWithString:[NSString stringWithFormat:@"%@",titleModel.images[0]]];
+//            NSData * imageData = [NSData dataWithContentsOfURL:JSONUrl];
+//            UIImage * image = [UIImage imageWithData:imageData];
+//            if ( image ){
+//                [_imageMutArray addObject:image];
+//            }
+//        }
+//        [_mainImageMutArray setArray:_imageMutArray];
+//        [_mainTitleMutArray setArray:_titleMutArray];
+//#pragma market
+//
+//        if ( !_MainView.titleMutArray ){
+//            _MainView.titleMutArray = [NSMutableArray array];
+//        }
+//        if ( !_MainView.imageMutArray ){
+//            _MainView.imageMutArray = [NSMutableArray array];
+//        }
+//
+//        NSLog(@"_MainView.titleMutArray.count = %li",_MainView.titleMutArray.count);
+//        NSInteger titleCountInteger = 0;
+//        titleCountInteger = _titleMutArray.count;
+//
+//            for (int i = 0; i < _titleMutArray.count; i++) {
+//                NSInteger flag = 0;
+//                NSString * str = _titleMutArray[i];
+//                for (int i = 0; i < _MainView.titleMutArray.count; i++) {
+//                    if ( [str isEqualToString:[NSString stringWithFormat:@"%@",_MainView.titleMutArray[i]]] ){
+//                        flag = 1;
+//                        break;
+//                    }
+//                }
+//                if ( flag == 0 ){
+//                    [_MainView.titleMutArray addObject:_titleMutArray[i]];
+//                    [_MainView.imageMutArray addObject:_imageMutArray[i]];
+//                }
+//            }
+//        //创建一个通知
+//        NSNotification * reloadDataNotification = [NSNotification notificationWithName:@"reloadDataTongZhi" object:nil userInfo:nil];
+//
+//        //创建并发送通知 然后在View层执行通知 通知的内容是更新视图
+//        //问题是
+//        [[NSNotificationCenter defaultCenter] postNotification:reloadDataNotification];
+        
+//        manager = nil;
     } error:^(NSError *error) {
         NSLog(@"网络请求出错-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-");
     }];
