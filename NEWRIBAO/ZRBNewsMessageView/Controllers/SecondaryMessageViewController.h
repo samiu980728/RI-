@@ -67,6 +67,8 @@
 
 @property (nonatomic, strong) NSMutableArray * idRequestMutArray;
 
+@property (nonatomic, strong) WKWebView * refreshWkWebView;
+
 @property (nonatomic, assign) BOOL refresh;
 - (void)fenethCommentsNumFromCommentManagerBlock;
 @end

@@ -10,6 +10,7 @@
 #import "ZRBNewsTableViewCell.h"
 #import "ZRBContinerViewController.h"
 #import <UIImageView+WebCache.h>
+#import <FMDB.h>
 @interface ZRBMainViewController ()<UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView * scrollView;
@@ -45,9 +46,6 @@
     if ( [self.navigationController respondsToSelector:@selector(interactivePopGestureRecognizer)] ){
         self.navigationController.interactivePopGestureRecognizer.delegate = nil;
     }
-
-    
-    
     _scrollView = [[UIScrollView alloc] initWithFrame:self.view.bounds];
     _scrollView.contentSize = CGSizeMake(0, 900);
     _scrollView.delegate = self;
@@ -94,7 +92,41 @@
     [self.navigationController.parentViewController performSelector:@selector(openCloseMenu)];
 }
 
-//manager类网络请求
+//开始FMDB！！！！！
+- (void)createFMDBDataSource
+{
+    NSString * cache = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).lastObject;
+    NSString * filePath = [cache stringByAppendingPathComponent:@"class.sqlite"];
+    //打开数据库
+    FMDatabase * base = [FMDatabase databaseWithPath:filePath];
+    if ([base open]){
+        NSLog(@"成功");
+    }else{
+        NSLog(@"失败");
+    }
+    //创建表
+    NSString * sql = @"create table if not exists t_students(id integer primary key autoincrement,title ";
+    //开始写数据库啦！！！
+    
+    
+    
+    
+    
+    
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 //给这加个参数 BOOL 类型 判断是否上拉 传参数进行以下两种判断即可
 - (void)fenethMessageFromManagerBlock:(BOOL)isRefresh
@@ -110,8 +142,6 @@
     NSString * mainTestStr = [[NSString alloc] init];
     if ( isRefresh == NO ){
         [[ZRBCoordinateMananger sharedManager] fetchDataFromNetisReferesh:NO Succeed:^(NSArray *array) {
-            NSLog(@"array = %@",array);
-            
             TotalJSONModel * totalJSONModel = array[0];
             [_allDateMutArray addObject:totalJSONModel.date];
             NSArray * data = totalJSONModel.stories;
@@ -143,7 +173,6 @@
     
     }else{
         [[ZRBCoordinateMananger sharedManager] fetchDataFromNetisReferesh:YES Succeed:^(NSArray *array) {
-            NSLog(@"多次之后的 array = %@",array);
             if ( _titleMutArray1.count > 0 ){
                 [_titleMutArray1 removeAllObjects];
                 [_imageMutArray1 removeAllObjects];
@@ -155,7 +184,6 @@
             for (int i = 0; i < array.count; i++) {
                 TotalJSONModel * totalJSONModel = array[i];
                 //现在这里面有一天的数据
-                NSLog(@"totalJSONModel.stories = %@",totalJSONModel.stories);
                 //一天的数据
                 NSMutableArray * titleMutArray = [[NSMutableArray alloc] init];
                 NSMutableArray * imageMutArray = [[NSMutableArray alloc] init];
@@ -164,7 +192,6 @@
                 [_allDateMutArray addObject:totalJSONModel.date];
                
                 NSArray * data = totalJSONModel.stories;
-                NSLog(@"data.count = %li - -- - - - - - -- - - ",data.count);
                     for (int i = 0; i < data.count; i++) {
                         StoriesJSONModel * storJSONMOdel = data[i];
                         [titleMutArray addObject:storJSONMOdel.title];
@@ -183,13 +210,6 @@
                 [_idSelfMutArray addObject:idMutArray];
                 [_urlImageMutArray addObject:urlMutArray];
             }
-            
-            NSLog(@"_titleMutArray1 = %@",_titleMutArray1);
-            
-//            dispatch_async(dispatch_get_main_queue(), ^{
-//                [_MainView.mainMessageTableView reloadData];
-//            });
-            
             NSNotification * reloadDateNotification = [NSNotification notificationWithName:@"reloadDataTongZhiController" object:nil];
             [[NSNotificationCenter defaultCenter] postNotification:reloadDateNotification];
         } error:^(NSError *error) {
@@ -197,8 +217,6 @@
         }];
         
     }
-    
-
 }
 
 - (void)reloadDataTongZhiController:(NSNotification *)noti
@@ -210,7 +228,6 @@
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-    NSLog(@"_allDateMutArray.count = %li",_allDateMutArray.count);
     return _allDateMutArray.count;
 }
 
@@ -224,16 +241,9 @@
     }
         if ( _allDateMutArray.count == 1 ){
         if ( _titleMutArray1.count > 0 ){
-            NSLog(@"indexPath.row = %li",indexPath.row);
-        //cell1.newsLabel.text = _titleMutArray1[indexPath.row];
-            
         cell1.newsLabel.text = _titleMutArray1[indexPath.row][0];
-//        [_titleMutArray1 removeObjectAtIndex:0];
-            
             NSString * urlStr = [NSString stringWithFormat:@"%@",_urlImageMutArray[indexPath.row]];
-            NSLog(@"urlStr = %@",urlStr);
         [cell1.newsImageView sd_setImageWithURL:[NSURL URLWithString:urlStr]];
-        //[_urlImageMutArray removeObjectAtIndex:0];
         }
     }else{
         if ( _allDateMutArray.count != 0 ){
@@ -241,9 +251,7 @@
     cell1.newsImageView.image = _imageMutArray1[indexPath.section][indexPath.row];
         }
     }
-    
     return cell1;
-    
 }
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
@@ -252,7 +260,6 @@
     if ( _headerFooterView == nil ){
         _headerFooterView = [[ZRBDetailsTableViewHeaderFooterView alloc] initWithReuseIdentifier:@"detailHeaderView"];
     }
-    
     if ( section != 0 ){
     _headerFooterView.dateLabel.text = _allDateMutArray[section];
     }
@@ -272,7 +279,6 @@
     if ( _allDateMutArray.count == 1 ){
         return _imageMutArray1.count;
     }
-    NSLog(@"section = %li",section);
     NSArray * array = [NSArray arrayWithObject:_imageMutArray1[section]];
     NSInteger i = 0;
     for (NSString * images in array[0]) {
@@ -301,9 +307,6 @@
     }else{
         self.navigationController.navigationBar.hidden = NO;
     }
-    
-    
-    //弄SDWebImage 试用
     if (scrollView.bounds.size.height + scrollView.contentOffset.y >scrollView.contentSize.height) {
         
         [UIView animateWithDuration:1.0 animations:^{
@@ -319,7 +322,6 @@
             _MainView.testStr = @"你好,我是中国人";
                 ZRBCoordinateMananger * manager = [ZRBCoordinateMananger sharedManager];
                 manager.ifAdoultRefreshStr = @"用户已经刷新过一次";
-                NSLog(@"manager.ifAdoultRefreshStr = == == = = %@",manager.ifAdoultRefreshStr);
                 [self fenethMessageFromManagerBlock:YES];
                 _refresh = NO;
             }
@@ -351,9 +353,6 @@
 
 - (void)giveCellJSONModelToMainView:(NSMutableArray *)imaMutArray andTitle:(NSMutableArray *)titMutArray
 {
-
-    NSLog(@"****************    imaMutArray = == = = =%@",imaMutArray);
-    NSLog(@"****************Controlller代理协议里的  _imageMutArray = == = = = = == = %@",_mainImageMutArray1);
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -364,7 +363,6 @@
 
 - (void)pushToWKWebView
 {
-    NSLog(@"_closeAndClickInteger = %li",_closeAndClickInteger);
     if ( _closeAndClickInteger % 2 != 0 ){
     [self.navigationController.parentViewController performSelector:@selector(openCloseMenu)];
         _closeAndClickInteger--;
@@ -377,7 +375,6 @@
         requestJSONModel.idRequestStr = [NSString stringWithFormat:@"%@",_idSelfMutArray[_indexPath.section+_indexPath.row]];
         secondMessageViewController.resaveIdString = [NSString stringWithFormat:@"%@",_idSelfMutArray[_indexPath.section+_indexPath.row]];
         NSInteger intEger = [secondMessageViewController.resaveIdString integerValue];
-        NSLog(@"intEger = %li",intEger);
         secondMessageViewController.idRequestMutArray = [NSMutableArray arrayWithArray:_idSelfMutArray];
     }else{
         secondMessageViewController.resaveIdString = [NSString stringWithFormat:@"%@",_idSelfMutArray[_indexPath.section][_indexPath.row]];
@@ -388,15 +385,7 @@
             [secondMessageViewController.idRequestMutArray addObject:idStr];
         }
         }
-        
-        NSLog(@"secondMessageViewController.idRequestMutArray.count = %li",secondMessageViewController.idRequestMutArray.count);
-//        for (int i = 0; i < _idSelfMutArray.count; i++) {
-//            NSArray * firstArray = [NSArray arrayWithArray:_idSelfMutArray[i]];
-//
-//        }
     }
-    NSLog(@"resaveIdString = %@",secondMessageViewController.resaveIdString);
-    NSLog(@"requestJSONModel.idRequestStr = %@",requestJSONModel.idRequestStr);
     [self.navigationController pushViewController:secondMessageViewController animated:NO];
 }
 

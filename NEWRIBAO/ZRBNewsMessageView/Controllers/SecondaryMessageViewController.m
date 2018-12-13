@@ -60,16 +60,24 @@
     
     [_mainWebView recieveNotification];
     
+    NSString * shareUrlStr = [NSString stringWithFormat:@"http://daily.zhihu.com/story/%@",_resaveIdString];
+    _refreshWkWebView = [[WKWebView alloc] init];
+    [_refreshWkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:shareUrlStr]]];
+    
+    
     [self.view addSubview:_scrollView];
-    [_scrollView addSubview:_mainWebView];
+    [_scrollView addSubview:_refreshWkWebView];
+    //[_scrollView addSubview:_mainWebView];
     
     [_scrollView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
-    
-    [_mainWebView mas_makeConstraints:^(MASConstraintMaker *make) {
+    [_refreshWkWebView mas_makeConstraints:^(MASConstraintMaker *make) {
         make.edges.equalTo(self.view);
     }];
+//    [_mainWebView mas_makeConstraints:^(MASConstraintMaker *make) {
+//        make.edges.equalTo(self.view);
+//    }];
     _refresh = YES;
 }
 
@@ -109,10 +117,6 @@
         _allShortCommentsInteger = additionalJSONModel.short_comments;
         //在上面创建ViewController 
         //如果长评论总数不为0 那么执行新闻对应长评论查看的网络请求
-        if ( additionalJSONModel.long_comments != 0 ){
-            //块请求后返回JOSNModel 然后
-        }
-        
         dispatch_async(dispatch_get_main_queue(), ^{
             _tabBarView = [[ZRBTabBarView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height) andAllapproval:_allsApprovalInteger andComments:_allsCommentsInteger];
             [_tabBarView.commentNewsButton addTarget:self action:@selector(pressCommentViewButton:) forControlEvents:UIControlEventTouchUpInside];
@@ -197,13 +201,6 @@
     }
     _tabBarView.giveApproveButton.selected = !_tabBarView.giveApproveButton.selected;
     
-    //出现UIView
-    //然后 前一个数字得消失  还有一个弹跳/弹动的效果实现
-    //那么也就意味着label 的原来的那个数字也得需要一个动画来让它弹跳着消失
-    //在什么时候让原来的数字消失？？？
-    //我认为应该在dispatch_after 0.7之后 让label上的文字消失即可
-#pragma mark  看CALayer
-    
     CAKeyframeAnimation * pathAnimation = [CAKeyframeAnimation animationWithKeyPath:@"position"];
     pathAnimation.calculationMode = kCAAnimationPaced;
     pathAnimation.fillMode = kCAFillModeForwards;
@@ -211,17 +208,10 @@
     pathAnimation.duration = 0.3;
     pathAnimation.repeatCount = 0;
     CGMutablePathRef curvedPath = CGPathCreateMutable();
-//    CGPathMoveToPoint(<#CGMutablePathRef  _Nullable path#>, <#const CGAffineTransform * _Nullable m#>, <#CGFloat x#>, <#CGFloat y#>)
     CGPathMoveToPoint(curvedPath, NULL, 316, 660);
     CGPathAddQuadCurveToPoint(curvedPath, NULL, 316, 650, 316, 640);
     pathAnimation.path = curvedPath;
     CGPathRelease(curvedPath);
-    UILabel * numLabel = [[UILabel alloc] initWithFrame:CGRectMake(300, 576, 200, 40)];
-    //numLabel.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"2.png"]];
-    numLabel.font = [UIFont systemFontOfSize:15];
-    numLabel.text = @"157";
-    [self.view addSubview:numLabel];
-    [numLabel.layer addAnimation:pathAnimation forKey:@"moveTheSquare"];
     
     
     
@@ -238,16 +228,12 @@
     [self.view addSubview:label];
     [self.view addSubview:textLabel];
     
-//    UILabel * numLabel = [[UILabel alloc] initWithFrame:CGRectMake(300, 576, 200, 40)];
-//    //numLabel.backgroundColor = [UIColor colorWithPatternImage:[UIImage imageNamed:@"2.png"]];
-//    numLabel.font = [UIFont systemFontOfSize:15];
-//    numLabel.text = @"157";
-//    [self.view addSubview:numLabel];
-//    [numLabel.layer addAnimation:pathAnimation forKey:@"moveTheSquare"];
-
+    UILabel * numLabel = [[UILabel alloc] initWithFrame:CGRectMake(300, 576, 200, 40)];
+    numLabel.font = [UIFont systemFontOfSize:15];
+    numLabel.text = @"157";
+    [self.view addSubview:numLabel];
+    [numLabel.layer addAnimation:pathAnimation forKey:@"moveTheSquare"];
     
-    dispatch_time_t disappearTime = dispatch_time(DISPATCH_TIME_NOW, (ino64_t)(0.7 * NSEC_PER_SEC));
-   // dispatch_after(disappearTime, dispatch_get_main_queue(), ^{
         [UIView animateWithDuration:0.1 delay:0.1 usingSpringWithDamping:0.2 initialSpringVelocity:0.6 options:UIViewAnimationOptionCurveEaseInOut animations:^{
             textLabel.alpha = 0.5;
             textLabel.frame = CGRectMake(180, 620, 100, 20);
@@ -257,13 +243,11 @@
                 [textLabel removeFromSuperview];
             });
         }];
-   // });
     
     dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (ino64_t)(2 * NSEC_PER_SEC));
     dispatch_after(time, dispatch_get_main_queue(), ^{
         [label removeFromSuperview];
         [numLabel removeFromSuperview];
-        //[textLabel removeFromSuperview];
     });
     
 }
@@ -275,48 +259,9 @@
 
 - (void)pressGoNextViewsButton:(UIButton *)idSender
 {
-    NSString * getRealIdString = [[NSString alloc] init];
-    for (int i = 0; i < _idRequestMutArray.count; i++) {
-        if ( [[NSString stringWithFormat:@"%@",_idRequestMutArray[i]] isEqualToString:_resaveIdString] ){
-            if ( _idRequestMutArray.count > i+1){
-                getRealIdString = [NSString stringWithFormat:@"%@",_idRequestMutArray[i+1]];
-                _resaveIdString = getRealIdString;
-            }
-            break;
-        }
-    }
-//    NSString * getRealIdString1 = [[NSString alloc] init];
-//    for (int i = 0; i < _idRequestMutArray.count; i++) {
-//        if ( [[NSString stringWithFormat:@"%@",_idRequestMutArray[i]] isEqualToString:_resaveIdString] ){
-//            if ( _idRequestMutArray.count > i+1){
-//                getRealIdString1 = [NSString stringWithFormat:@"%@",_idRequestMutArray[i+1]];
-//                _resaveIdString = getRealIdString1;
-//            }
-//            break;
-//        }
-//    }
-//    NSString * shareUrlStr = [NSString stringWithFormat:@"http://daily.zhihu.com/story/%@",getRealIdString1];
-//    WKWebView * webView = [[WKWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-//    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:shareUrlStr]]];
-//    self.view = webView;
-//    [self initWithTabBarView];
     
-    
-    
-    
-#pragma mark 以下为原来tiaozhuantiaozhuan
-    NSMutableArray * lastIdArray = [NSMutableArray arrayWithArray:_idRequestMutArray];
-    SecondaryMessageViewController * secondMessageViewController = [[SecondaryMessageViewController alloc] init];
-    secondMessageViewController.resaveIdString = getRealIdString;
-    secondMessageViewController.idRequestMutArray = [NSMutableArray arrayWithArray:lastIdArray];
-    NSArray * viewArray = [NSArray arrayWithObject:self.view.subviews];
-    NSLog(@"viewArray.count = %li",viewArray.count);
-    CATransition * transition = [CATransition animation];
-    transition.type = kCATransitionPush;
-    transition.subtype = kCATransitionFromTop;
-    [self.navigationController.view.layer addAnimation:transition forKey:kCATransition];
-    [self.navigationController pushViewController:secondMessageViewController animated:NO];
-    [self removeFromParentViewController];
+    [self refreshNewWkWebView];
+
 }
 
 - (void)pressCommentViewButton:(UIButton *)sender
@@ -348,56 +293,74 @@
         _refresh = YES;
         _flag = 0;
     }
-    if ( scrollView.frame.size.height + scrollView.contentOffset.y > scrollView.contentSize.height ){
+    
+    if (scrollView.contentOffset.y + [UIScreen mainScreen].bounds.size.height - 50 > scrollView.contentSize.height && scrollView.contentSize.height != 0 ) {
+    //if ( scrollView.frame.size.height + scrollView.contentOffset.y > scrollView.contentSize.height ){
         NSInteger i = 0;
         if ( _refresh ){
-            NSString * getRealIdString = [[NSString alloc] init];
-            for (int i = 0; i < _idRequestMutArray.count; i++) {
-                if ( [[NSString stringWithFormat:@"%@",_idRequestMutArray[i]] isEqualToString:_resaveIdString] ){
-                    if ( _idRequestMutArray.count > i+1){
-                        getRealIdString = [NSString stringWithFormat:@"%@",_idRequestMutArray[i+1]];
-                        _resaveIdString = getRealIdString;
-                    }
-                    break;
-                }
-            }
-//            NSString * shareUrlStr = [NSString stringWithFormat:@"http://daily.zhihu.com/story/%@",getRealIdString];
-//            WKWebView * webView = [[WKWebView alloc] initWithFrame:[UIScreen mainScreen].bounds];
-//            [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:shareUrlStr]]];
-//            self.view = webView;
-//            [self initWithTabBarView];
             
-#pragma mark  下面这个方法就可以另一种方法加载新的新闻界面了
-            SecondaryMessageViewController * secondMessageViewController = [[SecondaryMessageViewController alloc] init];
-            secondMessageViewController.resaveIdString = getRealIdString;
-            NSMutableArray * lastIdArray = [NSMutableArray arrayWithArray:_idRequestMutArray];
-            secondMessageViewController.idRequestMutArray = [NSMutableArray arrayWithArray:lastIdArray];
-            NSArray * viewArray = [NSArray arrayWithObject:self.view.subviews];
-            NSLog(@"viewArray.count = %li",viewArray.count);
-
-            CATransition * transition = [CATransition animation];
-            transition.type = kCATransitionPush;
-            transition.subtype = kCATransitionFromTop;
-            [self.navigationController.view.layer addAnimation:transition forKey:kCATransition];
-            self.view.backgroundColor = [UIColor whiteColor];
-            [self.navigationController pushViewController:secondMessageViewController animated:NO];
-            self.view.backgroundColor = [UIColor whiteColor];
-            [self removeFromParentViewController];
-            //[scrollView setContentOffset:CGPointZero animated:NO];
-#pragma mark  上面这个方法就可以另一种方法加载新的新闻界面了
-            _refresh = NO;
-            NSLog(@"xxoo");
+            [self refreshNewWkWebView];
+//
+//#pragma mark  下面这个方法就可以另一种方法加载新的新闻界面了
+//            SecondaryMessageViewController * secondMessageViewController = [[SecondaryMessageViewController alloc] init];
+//            secondMessageViewController.resaveIdString = getRealIdString;
+//            NSMutableArray * lastIdArray = [NSMutableArray arrayWithArray:_idRequestMutArray];
+//            secondMessageViewController.idRequestMutArray = [NSMutableArray arrayWithArray:lastIdArray];
+//            NSArray * viewArray = [NSArray arrayWithObject:self.view.subviews];
+//            NSLog(@"viewArray.count = %li",viewArray.count);
+//
+//            CATransition * transition = [CATransition animation];
+//            transition.type = kCATransitionPush;
+//            transition.subtype = kCATransitionFromTop;
+//            [self.navigationController.view.layer addAnimation:transition forKey:kCATransition];
+//            self.view.backgroundColor = [UIColor whiteColor];
+//            [self.navigationController pushViewController:secondMessageViewController animated:NO];
+//            self.view.backgroundColor = [UIColor whiteColor];
+//            [self removeFromParentViewController];
+//            //[scrollView setContentOffset:CGPointZero animated:NO];
+//#pragma mark  上面这个方法就可以另一种方法加载新的新闻界面了
+//
+//            _refresh = NO;
+//            NSLog(@"xxoo");
         }
     }
 }
 
-- (void)scrollViewDidEndDragging:(UIScrollView *)scrollView willDecelerate:(BOOL)decelerate
+- (void)refreshNewWkWebView
 {
-    if ( decelerate ){
-        dispatch_async(dispatch_get_main_queue(), ^{
-            [scrollView setContentOffset:scrollView.contentOffset animated:NO];
-        });
+    _refresh = NO;
+    NSString * getRealIdString = [[NSString alloc] init];
+    for (int i = 0; i < _idRequestMutArray.count; i++) {
+        if ( [[NSString stringWithFormat:@"%@",_idRequestMutArray[i]] isEqualToString:_resaveIdString] ){
+            if ( _idRequestMutArray.count > i+1){
+                getRealIdString = [NSString stringWithFormat:@"%@",_idRequestMutArray[i+1]];
+                _resaveIdString = getRealIdString;
+            }
+            break;
+        }
     }
+    NSString * shareUrlStr = [NSString stringWithFormat:@"http://daily.zhihu.com/story/%@",getRealIdString];
+    [_refreshWkWebView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:shareUrlStr]]];
+    [self fenethCommentsNumFromCommentManagerBlock];
+    [_refreshWkWebView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:nil];
+}
+
+
+//object：这个是所监听的对象，也就是所监听的属性所属的对象。
+//change：是传入的变化量，通过在注册时用options参数进行的配置，会包含不同的内容。
+//其他参数含义同注册时方法的参数含义。
+//在实现这个方法中需要注意的是， 一定要对注册监听的所有属性都进行处理——使用context参数进行判断——否则Xcode会警告。
+- (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSKeyValueChangeKey,id> *)change context:(void *)context
+{
+    NSLog(@"self.refreshWkWebView.estimatedProgress = %f",self.refreshWkWebView.estimatedProgress);
+    if ( self.refreshWkWebView.estimatedProgress == [[NSNumber numberWithFloat:1.0] floatValue] ){
+        _refresh = YES;
+    }
+}
+
+- (void)dealloc
+{
+    //[_refreshWkWebView removeObserver:self forKeyPath:@"estimatedProgress"];
 }
 
 - (id<UIViewControllerAnimatedTransitioning>)navigationController:(UINavigationController *)navigationController animationControllerForOperation:(UINavigationControllerOperation)operation fromViewController:(UIViewController *)fromVC toViewController:(UIViewController *)toVC
