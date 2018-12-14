@@ -10,7 +10,7 @@
 #import "ZRBNewsTableViewCell.h"
 #import "ZRBContinerViewController.h"
 #import <UIImageView+WebCache.h>
-#import <FMDB.h>
+
 @interface ZRBMainViewController ()<UIScrollViewDelegate>
 
 @property (nonatomic, strong) UIScrollView * scrollView;
@@ -26,6 +26,8 @@
     // Do any additional setup after loading the view.
     _refreshNumInteger = 0;
     _closeAndClickInteger = 0;
+    _ifNetRequestInteger = 0;
+    _haveGetSQLDataInteger = 0;
     
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(reloadDataTongZhiController:) name:@"reloadDataTongZhiController" object:nil];
     
@@ -82,6 +84,16 @@
     }];
     _barImageView = [[UIImageView alloc] init];
     _barImageView = self.navigationController.navigationBar.subviews.firstObject;
+    
+    //创建数据库
+    _tableName = @"JPXUser";
+    NSString * docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
+    NSString * dbPath = [docsdir stringByAppendingPathComponent:@"title.sqlite1"];
+    //_sqlDataBase = [FMDatabase databaseWithPath:dbPath];\
+    //开始弄数据库啦
+    [self createFMDBDataSource];
+    
+    
 }
 
 //侧边框栏的展开和关闭
@@ -95,38 +107,108 @@
 //开始FMDB！！！！！
 - (void)createFMDBDataSource
 {
-    NSString * cache = NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES).lastObject;
-    NSString * filePath = [cache stringByAppendingPathComponent:@"class.sqlite"];
-    //打开数据库
-    FMDatabase * base = [FMDatabase databaseWithPath:filePath];
-    if ([base open]){
-        NSLog(@"成功");
-    }else{
-        NSLog(@"失败");
-    }
-    //创建表
-    NSString * sql = @"create table if not exists t_students(id integer primary key autoincrement,title ";
     //开始写数据库啦！！！
+//    NSDocumentDirectory 是指程序中对应的Documents路径，
+//    而NSDocumentionDirectory对应于程序中的Library/Documentation路径，这个路径是没有读写权限的，所以看不到文件生成。
+    NSString * docsdir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
+    NSString * dbPath = [docsdir stringByAppendingPathComponent:@"title.sqlite1"];
+    FMDatabase * db = [FMDatabase databaseWithPath:dbPath];
+    _sqlDataBase = db;
+    [db open];
+    if ([db open]) {
+        NSString * sql = @"CREATE TABLE 'JPXUser' ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'title' text)";
+        BOOL res = [db executeUpdate:sql];
+        if (!res) {
+            NSLog(@"错啦");
+        } else {
+            NSLog(@"对啦");
+        }
+        [db close];
+    } else {
+        NSLog(@"打不开呀");
+    }
     
+    //删除
+    //[self deleteSQLDataWith:db andTableName:@"JPXUser"];
     
+    //传入
+    //[self insertMessages:_titleMutArray1 toSQL:db];
     
-    
-    
-    
+    //打印
+    //[self printfSQLDataWith:db andTableName:@"JPXUser"];
 }
 
+//传入data 给数据库
+- (void)insertMessages:(NSMutableArray *)titleMutArray toSQL:(FMDatabase *)dataBase
+{
+    [dataBase open];
+    BOOL  insertSQLResult = NO;
+    NSInteger  insertNum = 0;
+    for (NSInteger i = 0; i < titleMutArray.count; i++) {
+        NSString * sql = @"insert into JPXUser (title) values(?) ";
+        NSString * title = [NSString stringWithFormat:@"%@",titleMutArray[i]];
+        insertSQLResult = [dataBase executeUpdate:sql, title];
+        if (!insertSQLResult) {
+            NSLog(@"传值失败");
+        } else {
+            NSLog(@"传值成功");
+        }
+        NSLog(@"第%li次传值",i);
+    }
+    [dataBase close];
+}
 
+//删除数据库
+- (void)deleteSQLDataWith:(FMDatabase *)dataBase andTableName:(NSString *)tableNameStr
+{
+    if ([dataBase open]) {
+        NSString * sql = [NSString stringWithFormat:@"delete from %@",tableNameStr];
+        BOOL res = [dataBase executeUpdate:sql];
+        if (!res) {
+            NSLog(@"error to delete db data");
+        } else {
+            NSLog(@"succ to deleta db data");
+        }
+        [dataBase close];
+    }
+}
 
+//打开数据库
+- (void)openSQLDataWith:(FMDatabase *)dataBase andTableName:(NSString *)tableNameStr
+{
+    if ([dataBase open]) {
+        FMResultSet * getRes = [dataBase executeQuery:[NSString stringWithFormat:@"SELECT * FROM %@",tableNameStr]];
+        if ([_titleMutArray1 isKindOfClass:[NSArray class]] &&_titleMutArray1.count == 0) {
+        while ([getRes next]) {
+            NSString * title = [NSString stringWithFormat:@"%@",[getRes stringForColumnIndex:1]];
+            NSString * temp = [title stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceCharacterSet]];
+            NSString * text = [temp stringByTrimmingCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            [_titleMutArray1 addObject:text];
+        }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [_MainView.mainMessageTableView reloadData];
+            });
+        }
+        [dataBase close];
+    }
+}
 
+//打印数据库
+- (void)printfSQLDataWith:(FMDatabase *)dataBase andTableName:(NSString *)tableNameStr
+{
+    if ([dataBase open]) {
+        FMResultSet * getRes = [dataBase executeQuery:[NSString stringWithFormat:@"SELECT * FROM %@",tableNameStr]];
+        while ([getRes next]) {
+            NSInteger userId = [getRes intForColumnIndex:0];
+            NSString * title = [getRes stringForColumnIndex:1];
+            NSLog(@"title = %@ user id = %li",title,userId);
+        }
+        [dataBase close];
+    }
+}
 
-
-
-
-
-
-
-
-
+//判断数据库中是否有内容，有的话 加载即可
+//- (void)
 
 //给这加个参数 BOOL 类型 判断是否上拉 传参数进行以下两种判断即可
 - (void)fenethMessageFromManagerBlock:(BOOL)isRefresh
@@ -136,12 +218,12 @@
     _titleMutArray1 = [[NSMutableArray alloc] init];
     _imageMutArray1 = [[NSMutableArray alloc] init];
     
-    NSMutableArray * mainImageMutArray = [[NSMutableArray alloc] init];
-    NSMutableArray * mainTitleMutArray = [[NSMutableArray alloc] init];
-    //测试
-    NSString * mainTestStr = [[NSString alloc] init];
+    dispatch_queue_t queue = dispatch_queue_create("NetRequestQueue", DISPATCH_QUEUE_SERIAL);
+   // dispatch_async(queue, ^{
+//    });
     if ( isRefresh == NO ){
         [[ZRBCoordinateMananger sharedManager] fetchDataFromNetisReferesh:NO Succeed:^(NSArray *array) {
+            _ifNetRequestInteger = 1;
             TotalJSONModel * totalJSONModel = array[0];
             [_allDateMutArray addObject:totalJSONModel.date];
             NSArray * data = totalJSONModel.stories;
@@ -164,6 +246,10 @@
                 [_urlImageMutArray addObject:[NSURL URLWithString:[NSString stringWithFormat:@"%@",storJSONModel.images[0]]]];
             }
                         dispatch_async(dispatch_get_main_queue(), ^{
+                            //[self createFMDBDataSource];
+                            [self deleteSQLDataWith:_sqlDataBase andTableName:_tableName];
+                            [self insertMessages:_titleMutArray1 toSQL:_sqlDataBase];
+                            [self printfSQLDataWith:_sqlDataBase andTableName:_tableName];
                             [_MainView.mainMessageTableView reloadData];
                         });
             
@@ -217,18 +303,56 @@
         }];
         
     }
+         //});
+    dispatch_time_t time = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3*NSEC_PER_SEC));
+    dispatch_after(time, dispatch_get_main_queue(), ^{
+        if (_ifNetRequestInteger == 0) {
+            _haveGetSQLDataInteger = 1;
+            [_allDateMutArray addObject:@"23333"];
+            [self openSQLDataWith:_sqlDataBase andTableName:_tableName];
+        }
+    });
 }
+
+//接下来： 就是把uicode 编码串转化为中文字符 转换不成功的关键就是
+//她把一个数组传给了NSString类型 导致她打印出来：数组！！！！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 - (void)reloadDataTongZhiController:(NSNotification *)noti
 {
     dispatch_async(dispatch_get_main_queue(), ^{
+//        [self deleteSQLDataWith:_sqlDataBase andTableName:_tableName];
+//        [self insertMessages:_titleMutArray1 toSQL:_sqlDataBase];
         [_MainView.mainMessageTableView reloadData];
     });
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
+    //if ([_allDateMutArray isKindOfClass:[NSArray class]] && _allDateMutArray.count > 0) {
     return _allDateMutArray.count;
+   // }
+//    if (_haveGetSQLDataInteger == 1 ){
+//        return _haveGetSQLDataInteger;
+//    }
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -241,14 +365,40 @@
     }
         if ( _allDateMutArray.count == 1 ){
         if ( _titleMutArray1.count > 0 ){
-        cell1.newsLabel.text = _titleMutArray1[indexPath.row][0];
-            NSString * urlStr = [NSString stringWithFormat:@"%@",_urlImageMutArray[indexPath.row]];
-        [cell1.newsImageView sd_setImageWithURL:[NSURL URLWithString:urlStr]];
+            NSMutableString *string = [NSMutableString string];
+            
+            // 开头有个[
+            [string appendString:@"[\n"];
+            
+            // 遍历所有的元素
+            [_titleMutArray1 enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                [string appendFormat:@"\t%@,\n", obj];
+            }];
+            
+            // 结尾有个]
+            [string appendString:@"]"];
+            
+            // 查找最后一个逗号
+            NSRange range = [string rangeOfString:@"," options:NSBackwardsSearch];
+            if (range.location != NSNotFound)
+                [string deleteCharactersInRange:range];
+            if (_haveGetSQLDataInteger == 0) {
+                cell1.newsLabel.text = _titleMutArray1[indexPath.row][0];
+            }
+            else if (_haveGetSQLDataInteger == 1) {
+                cell1.newsLabel.text = _titleMutArray1[indexPath.row];
+            }
+            
+            if (_imageMutArray1.count > 0){
+                
+                NSString * urlStr = [NSString stringWithFormat:@"%@",_urlImageMutArray[indexPath.row]];
+                [cell1.newsImageView sd_setImageWithURL:[NSURL URLWithString:urlStr]];
+            }
         }
     }else{
         if ( _allDateMutArray.count != 0 ){
-    cell1.newsLabel.text = _titleMutArray1[indexPath.section][indexPath.row];
-    cell1.newsImageView.image = _imageMutArray1[indexPath.section][indexPath.row];
+                cell1.newsLabel.text = _titleMutArray1[indexPath.section][indexPath.row];
+                cell1.newsImageView.image = _imageMutArray1[indexPath.section][indexPath.row];
         }
     }
     return cell1;
@@ -261,7 +411,9 @@
         _headerFooterView = [[ZRBDetailsTableViewHeaderFooterView alloc] initWithReuseIdentifier:@"detailHeaderView"];
     }
     if ( section != 0 ){
-    _headerFooterView.dateLabel.text = _allDateMutArray[section];
+        if ([_allDateMutArray isKindOfClass:[NSArray class]] && _allDateMutArray.count > 0){
+            _headerFooterView.dateLabel.text = _allDateMutArray[section];
+        }
     }
     return _headerFooterView;
 }
@@ -277,9 +429,12 @@
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
     if ( _allDateMutArray.count == 1 ){
-        return _imageMutArray1.count;
+        return _titleMutArray1.count;
     }
-    NSArray * array = [NSArray arrayWithObject:_imageMutArray1[section]];
+    if (_haveGetSQLDataInteger == 1) {
+        return _titleMutArray1.count;
+    }
+    NSArray * array = [NSArray arrayWithObject:_titleMutArray1[section]];
     NSInteger i = 0;
     for (NSString * images in array[0]) {
         i++;
