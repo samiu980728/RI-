@@ -18,11 +18,17 @@
 #import "ZRBDetailsTableViewHeaderFooterView.h"
 #import "ZRBCoordinateMananger.h"
 #import <FMDB.h>
+#import "ZRBSQLiteManager.h"
 @interface ZRBMainViewController : UIViewController
 <ZRBPushToWebViewDelegate,UITableViewDelegate,ZRBGiveCellJSONMOdelToMainViewDelegate,UITableViewDataSource>
 
 //创建全局变量的数据库名称 然后创建  给数据的时候 他不是要更新UITABLEVIew呢么  那么如果数据库里面有数据的话
 //即使没有进行网络请求 那么也可以进行数据请求
+
+@property (nonatomic, strong) FMDatabase * imageRealSQLDataBase;
+
+@property (nonatomic, copy) NSString * imageTableName;
+
 @property (nonatomic, copy) NSString * tableName;
 
 @property (nonatomic, strong) FMDatabase * sqlDataBase;
