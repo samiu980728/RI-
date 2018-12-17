@@ -26,15 +26,17 @@ static FMDatabase * imageManagerSqlDataBase;
     NSString * docsDir = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)lastObject];
     NSString * dbPath = [docsDir stringByAppendingPathComponent:sqlName];
     FMDatabase * db = [FMDatabase databaseWithPath:dbPath];
+    if (!_imageSqlDataBase) {
     _imageSqlDataBase = db;
+    }
     [db open];
     if ([db open]) {
-        NSString * sql = @"CREATE TABLE 'JPXImageUrlUser' ('id' INTEGER PRIMARY KEY AUTOINCREMENAT NOT NULL , 'imageUrl' text)";
+        NSString * sql = @"CREATE TABLE 'JPXImageUrlUser' ('id' INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL , 'imageUrl' text)";
         BOOL res = [db executeUpdate:sql];
         if (!res) {
-            NSLog(@"错啦");
+            NSLog(@"照片错啦");
         } else {
-            NSLog(@"对啦");
+            NSLog(@"照片对啦");
         }
         [db close];
     } else {
@@ -44,20 +46,21 @@ static FMDatabase * imageManagerSqlDataBase;
 
 - (void)insertImageMessages:(NSMutableArray *)imageUrlMutArray toSQL:(FMDatabase *)dataBase
 {
+    NSLog(@"_imageSqlDataBase = %@",_imageSqlDataBase);
     [dataBase open];
     BOOL insertSQLImageResult = NO;
-    NSError * error = nil;
     for (NSInteger i = 0; i < imageUrlMutArray.count; i++) {
-        NSString * sql1 = @"insert into JPXImageUrlUser (imageUrl) values(?)";
+        //NSString * sql1 = @"insert into JPXImageUrlUser (imageUrl) values(?)";
         NSString * sql = @"insert into JPXImageUrlUser (imageUrl) values(?) ";
         NSLog(@"第%li次传值",i);
-//        NSData * imageData = [NSJSONSerialization dataWithJSONObject:[NSURL URLWithString:imageUrlMutArray[i]] options:NSJSONWritingPrettyPrinted error:&error];
+        //NSData * imageData = [NSJSONSerialization dataWithJSONObject:[NSURL URLWithString:imageUrlMutArray[i]] options:NSJSONWritingPrettyPrinted error:&error];
+        NSData * imageData = [NSData dataWithContentsOfURL:imageUrlMutArray[i]];
 //        NSString * jsonStr = [[NSString alloc] initWithData:imageData encoding:NSUTF8StringEncoding];
 //        NSLog(@"jsonStr = %@  imageUrlMutArray = %@",jsonStr,imageUrlMutArray);
         
         NSString * imageStr = [NSString stringWithFormat:@"%@",imageUrlMutArray[i]];
         insertSQLImageResult = [dataBase executeUpdate:sql, imageStr];
-//        insertSQLImageResult = [dataBase executeUpdate:sql, jsonStr];
+        //insertSQLImageResult = [dataBase executeUpdate:sql, imageData];
         if (!insertSQLImageResult) {
             NSLog(@"传值失败");
         } else {

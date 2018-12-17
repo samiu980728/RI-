@@ -102,6 +102,9 @@
     [manager createFMDBImageDataSourceWithSQLName:sqlName];
     
     _imageRealSQLDataBase = manager.imageSqlDataBase;
+    if ( _imageRealSQLDataBase ) {
+        NSLog(@"存在");
+    }
 }
 
 //侧边框栏的展开和关闭
@@ -268,6 +271,7 @@
                             [self printfSQLDataWith:_sqlDataBase andTableName:_tableName];
                             
                             ZRBSQLiteManager * manager = [ZRBSQLiteManager sharedManager];
+                            NSLog(@"_imageRealSQLDataBase = %@",_imageRealSQLDataBase);
                             [manager deleteSQLImageDataWith:_imageRealSQLDataBase andTableName:_imageTableName];
                             [manager insertImageMessages:_urlImageMutArray toSQL:_imageRealSQLDataBase];
                             
@@ -380,7 +384,11 @@
             else if (_haveGetSQLDataInteger == 1) {
                 cell1.newsLabel.text = _titleMutArray1[indexPath.row];
                 NSString * urlStr = [NSString stringWithFormat:@"%@",_urlImageMutArray[indexPath.row]];
-                [cell1.newsImageView sd_setImageWithURL:[NSURL URLWithString:urlStr]];
+                //此方法会先从memory中取。
+                UIImage * image = [[SDImageCache sharedImageCache] imageFromDiskCacheForKey:urlStr];
+                if (image) {
+                    [cell1.newsImageView sd_setImageWithURL:[NSURL URLWithString:urlStr]];
+                }
             }
             
 //            if (_imageMutArray1.count > 0){
@@ -396,6 +404,23 @@
     }
     return cell1;
 }
+
+//照片数据库创建失败！！！！！
+//原因：  manager 类里面传值失败！！！！
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 - (UIView *)tableView:(UITableView *)tableView viewForHeaderInSection:(NSInteger)section
 {
@@ -465,12 +490,17 @@
             
            // NSLog(@"发起上拉加载");
             if ( _refresh ){
-                //self.navigationController.navigationBar.hidden = YES;
-                //NSLog(@"发起上拉加载assdasdasdsa");
-            _MainView.testStr = @"你好,我是中国人";
+                
+                //_ifNetRequestInteger = 2;
+                //此时处于无网络状态
+                if (_haveGetSQLDataInteger == 1){
+                    NSLog(@"无网络，加载失败");
+                } else{
+                _MainView.testStr = @"你好,我是中国人";
                 ZRBCoordinateMananger * manager = [ZRBCoordinateMananger sharedManager];
                 manager.ifAdoultRefreshStr = @"用户已经刷新过一次";
                 [self fenethMessageFromManagerBlock:YES];
+                }
                 _refresh = NO;
             }
             
